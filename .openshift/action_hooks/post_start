@@ -5,8 +5,10 @@ mkdir temp_dir
 
 
 celery multi stop worker1 --pidfile="temp_dir/%n.pid"
+ps auxww | grep 'celery worker' | grep "worker1.pid" | awk '{print $2}' | xargs kill -9
 rm -rf temp_dir/worker1.pid
 cd $OPENSHIFT_REPO_DIR
+
 celery multi start worker1 \
 	-A tasks \
 	--pidfile="temp_dir/%n.pid" \

@@ -2,10 +2,6 @@
 
 
 from flask import Flask, request
-
-
-from celery.result import BaseAsyncResult
-
 from tasks import add
 from tasks import fb_messenger_reply
 import requests

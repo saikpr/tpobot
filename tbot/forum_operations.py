@@ -121,8 +121,6 @@ def get_top_forums_ids(sid_php):
 
     logging.info("Request was successful, valid sid_php")
 
-    return True
-    
     try: 
         bs = BeautifulSoup(req.text,"html.parser")
     except HTMLParseError as e:
@@ -150,7 +148,7 @@ def get_top_forums_ids(sid_php):
     
     return list_of_forum_ids
 
-def forum_data(sid_php,forum_sub_id):
+def forum_post_ids(sid_php,forum_sub_id):
     global TPO_url 
     global TPO_top_forum_id
     
@@ -163,44 +161,50 @@ def forum_data(sid_php,forum_sub_id):
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:47.0) Gecko/20100101 Firefox/47.0",
         "Content-Type": "application/x-www-form-urlencoded",
         }
-    
-    url = TPO_url+"/forum/viewforum.php?f="+str(forum_sub_id)+"&sid="+sid_php
-    logging.info("URL For forum_sub_id : "+url)
+    list_of_forum_ids = None
+    for start_forum in xrange(0,1000,25):
+        url = TPO_url+"/forum/viewforum.php?f="+str(forum_sub_id)+"&sid="+sid_php+"&start="+str(start_forum)
+        logging.info("URL For forum_sub_id : "+url)
 
 
-    logging.info("Trying To get the internal forum page")
-    try:
-        req = requests.get(url,headers=headers)
-    except requests.exceptions.Timeout:
-        logging.error("Request Timed Out, maybe server is busy")
-        return None
-    except requests.exceptions.HTTPError as ee:
-        logging.error("HTTPError Raise : " + str(ee))
-        return None
-    except requests.exceptions.RequestException as e:
-        logging.error("RequestException : Something very terrible : "+str(e))
-        return None
+        logging.info("Trying To get the internal forum page")
+        try:
+            req = requests.get(url,headers=headers)
+        except requests.exceptions.Timeout:
+            logging.error("Request Timed Out, maybe server is busy")
+            return list_of_forum_ids
+        except requests.exceptions.HTTPError as ee:
+            logging.error("HTTPError Raise : " + str(ee))
+            return list_of_forum_ids
+        except requests.exceptions.RequestException as e:
+            logging.error("RequestException : Something very terrible : "+str(e))
+            return list_of_forum_ids
 
-    
-    try: 
-        bs = BeautifulSoup(req.text,"html.parser")
-    except HTMLParseError as e:
-        logging.error("HTML Parse Error"+str(e))
-        return None
-    
-    forum_ids =bs.findAll("a",{"class":"topictitle"})
-    
-    if not forum_ids :
-        logging.error("Unable to forum_ids from the request ")
-        return None
-    list_of_forum_ids = list()
-    for each_elem in forum_ids:
-        temp = each_elem["href"].split("&") #[u'./viewtopic.php?f=165', u't=2558', u'sid=8e33e46ff9acbf94ad8e3daf710b77ff']
-        temp =temp[1] #'t=2558'
-        temp = temp [2:] #'2558'
-        list_of_forum_ids.append(temp)
-    # list_of_forum_ids =[filter(lambda stri: stri[:2]=="t=", )[0][2:] for each_elem in forum_ids]
-    
+        
+        try: 
+            bs = BeautifulSoup(req.text,"html.parser")
+        except HTMLParseError as e:
+            logging.error("HTML Parse Error"+str(e))
+            return list_of_forum_ids
+        
+        forum_ids =bs.findAll("a",{"class":"topictitle"})
+        
+        if not forum_ids :
+            logging.error("Unable to forum_ids from the request ")
+            return list_of_forum_ids
+        if not list_of_forum_ids:
+            list_of_forum_ids = list()
+        for each_elem in forum_ids:
+            temp = each_elem["href"].split("&") #[u'./viewtopic.php?f=165', u't=2558', u'sid=8e33e46ff9acbf94ad8e3daf710b77ff']
+            temp =temp[1] #'t=2558'
+            temp = temp [2:] #'2558'
+            if temp not in list_of_forum_ids:
+                list_of_forum_ids.append(temp)
+            else:
+                return list_of_forum_ids
+
+        # list_of_forum_ids =[filter(lambda stri: stri[:2]=="t=", )[0][2:] for each_elem in forum_ids]
+        
 
     return list_of_forum_ids
 
@@ -256,7 +260,7 @@ if __name__ == "__main__":
     sid_php = forum_direct_login()
     k =  get_top_forums_ids(sid_php)
     print k
-    print forum_data(sid_php,k[0][0])
+    print forum_post_ids(sid_php,k[0][0])
     # for each_elem in k:
     #     print forum_data(sid_php,each_elem[0])
     print get_forum_text(sid_php,165,2562)
