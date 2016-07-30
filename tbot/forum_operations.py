@@ -243,9 +243,13 @@ def get_forum_text (sid_php, forum_sub_id,forum_post_id):
         logging.error("HTML Parse Error"+str(e))
         return None
 
-    body_text= bs.findAll("div",{"class":"content"})[0]
-    title_text= bs.findAll("h3",{"class":"first"})[0]
-    
+    try:
+        body_text= bs.findAll("div",{"class":"content"})[0]
+        title_text= bs.findAll("h3",{"class":"first"})[0]
+    except IndexError:
+        logging.error("Post doesnot exist")
+        return None
+
     if not body_text  or not title_text:
         logging.error("Unable to body_text or title_text from the request ")
         return None

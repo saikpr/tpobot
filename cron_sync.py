@@ -44,6 +44,9 @@ def update_db():
         for each_forum in list_sub_forum:
             if  db.forum_post.find({"post_id":each_forum}).count() == 0 :
                 forum_post_data = get_forum_text(sid_php,each_ele[0],each_forum)
+                if not forum_post_data:
+                    print "ERROR" , each_ele[0], each_forum
+                    continue
                 db.forum_post.insert({"title":forum_post_data[0],
                                       "body":forum_post_data[1],
                                       "url":forum_post_data[2],
