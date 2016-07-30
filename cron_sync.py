@@ -33,25 +33,23 @@ def update_db():
         return None
 
     for each_ele in top_forum_tuple:
-        if not db.forum_top.find({"forum_id":each_ele[0]}).count() == 0 :
+        if  db.forum_top.find({"forum_id":each_ele[0]}).count() == 0 :
             db.forum_top.insert({"batch":each_ele[1],"forum_id":each_ele[0]})
+        
         list_sub_forum = forum_post_ids(sid_php,each_ele[0])
         if  not top_forum_tuple:
             print "ERROR"
             continue
 
         for each_forum in list_sub_forum:
-            forum_post_data = get_forum_text(sid_php,each_ele[0],each_forum)
-            pprint ({"title":forum_post_data[0],
-                                                "body":forum_post_data[1],
-                                                "url":forum_post_data[2],
-                                                "parent_forum":each_ele[0],
-                                                "post_id":each_forum})
-            # db.forum_post.insert({"title":forum_post_data[0],
-            #                       "body":forum_post_data[1],
-            #                       "url":forum_post_data[2],
-            #                       "parent_forum":each_ele[0],
-            #                       "post_id":each_forum})
+            if  db.forum_post.find({"post_id":each_forum}).count() == 0 :
+                forum_post_data = get_forum_text(sid_php,each_ele[0],each_forum)
+                db.forum_post.insert({"title":forum_post_data[0],
+                                      "body":forum_post_data[1],
+                                      "url":forum_post_data[2],
+                                      "parent_forum":each_ele[0],
+                                      "post_id":each_forum})
+                print each_ele[0], each_forum
 
 if __name__ == "__main__":
     update_db()
