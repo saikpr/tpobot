@@ -2,7 +2,7 @@ import os
 
 
 try:
-    application_url = os.environ["OPENSHIFT_APP_DNS"]
+    application_url = os.environ["OPENSHIFT_APP_DNS"] #TODO use .get("","")
 except KeyError:
     application_url = ""
 
@@ -17,7 +17,10 @@ try:
 except KeyError:
     mongo_db_port = ""
 
-
+try:
+    fb_tpobot_access_code = os.environ["FB_tpobot_ACCESS_CODE"]
+except KeyError:
+    fb_tpobot_access_code = ""
 
 
 TPO_forum_user_id = os.environ["TPO_FORUM_USER_ID"]
