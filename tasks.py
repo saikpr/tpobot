@@ -1,20 +1,28 @@
 from celery import Celery
+from tbot.config import mongo_db_url
 from tbot.config import fb_tpobot_access_code
 import requests
-import os
 
+CELERY_BROKER = mongo_db_url 
 
+print CELERY_BROKER
 celery_app = Celery(__name__)
 
 celery_app.conf.update(
     #BROKER_URL='ironmq://<project_id>:<token>@',
-    BROKER_URL=os.environ.get("CLOUDAMQP_URI",""),
+    BROKER_URL=CELERY_BROKER,
     #BROKER_URL='redis://localhost:6379/0',
     BROKER_POOL_LIMIT=2,
     CELERY_TASK_SERIALIZER='json',
     CELERY_RESULT_SERIALIZER='json',
     CELERY_ACCEPT_CONTENT = ['json'],
-    CELERY_RESULT_BACKEND='amqp',
+    CELERY_RESULT_BACKEND=mongo_db_url,
+    BROKER_VHOST = "celery",
+	CELERY_MONGODB_BACKEND_SETTINGS = {
+	    'database': 'celery_db_run',
+	    'taskmeta_collection': 'my_taskmeta_collection',
+	}
+
 )
 
 

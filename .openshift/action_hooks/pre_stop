@@ -1,6 +1,6 @@
 #!/bin/bash
 
 cd $OPENSHIFT_REPO_DIR
-cd temp_dir
-rm *.pid
-celery multi stop worker1
+
+celery multi stop worker1 --pidfile="temp_dir/%n.pid"
+rm -rf temp_dir/worker1.pid

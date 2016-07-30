@@ -2,10 +2,11 @@
 
 cd $OPENSHIFT_REPO_DIR
 mkdir temp_dir
-cd temp_dir
-rm *.pid
+
+
+celery multi stop worker1 --pidfile="temp_dir/%n.pid"
+rm -rf temp_dir/worker1.pid
 cd $OPENSHIFT_REPO_DIR
-celery multi stop worker1
 celery multi start worker1 \
 	-A tasks \
 	--pidfile="temp_dir/%n.pid" \
