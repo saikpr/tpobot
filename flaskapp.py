@@ -2,25 +2,36 @@
 
 
 from flask import Flask, request
-from tbot.config import fb_tpobot_access_code
+
+
+from celery.result import BaseAsyncResult
+
+from tasks import add
+from tasks import fb_messenger_reply
 import requests
 
 from pprint import pprint
-app = Flask(__name__)
+flask_app = Flask(__name__)
+
+
 
 # print fb_tpobot_access_code
-def reply(user_id, msg):
-    data = {
-        "recipient": {"id": user_id},
-        "message": {"text": msg}
-    }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + fb_tpobot_access_code, json=data)
-    print(resp.content)
-@app.route('/', methods=['GET'])
+
+@flask_app.route('/', methods=['GET'])
 def handle_verification():
     return request.args['hub.challenge']
 
-@app.route('/', methods=['POST'])
+
+
+@flask_app.route('/v', methods=['GET'])
+def handle_v():
+    k = add.delay(23,23)
+    res = k.get(timeout=5)
+    print res
+    return str(res)
+
+
+@flask_app.route('/', methods=['POST'])
 def handle_incoming_messages():
     data = request.json
     pprint( data)
@@ -29,7 +40,7 @@ def handle_incoming_messages():
             try:
                 sender = each_message['sender']['id']
                 message = each_message['message']['text']
-                reply(sender, message[::-1])
+                fb_messenger_reply.apply_async((sender, message[::-1]))
             except KeyError:
                 pass
     return "ok"

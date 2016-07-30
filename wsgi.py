@@ -3,7 +3,7 @@
 # line, it's possible required libraries won't be in your searchable path
 #
 
-from flaskapp import app as application
+from flaskapp import flask_app as application
 
 #
 # Below for testing only

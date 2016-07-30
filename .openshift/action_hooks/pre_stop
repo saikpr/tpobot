@@ -1,6 +1,6 @@
 #!/bin/bash
 
 cd $OPENSHIFT_REPO_DIR
-mkdir tmp
-rm worker1.pid
+cd temp_dir
+rm *.pid
 celery multi stop worker1
