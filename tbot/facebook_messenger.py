@@ -3,6 +3,8 @@ import logging
 from HTMLParser import HTMLParseError
 from .config import mongo_client
 from .config import fb_tpobot_access_code
+import time
+import re
 
 
 db = mongo_client["facebook_messenger_user"]
@@ -25,7 +27,9 @@ def register_user(fb_user_id, user_name, group, emailid, forum_batch_code, last_
             "group":group,
             "email_id":emailid,
             "batch_forum_code":forum_batch_code,
-            "last_forum_id":last_forum_id
+            "last_forum_id":last_forum_id,
+            "register_timestamp":time.time(),
+            "last_active":time.time()
     }
     tmp = db.userinfo.insert_one(user_dict)
 
@@ -39,9 +43,30 @@ def get_fourms_ids_user(fb_user_id):
 
     user_data = db.userinfo.find_one({"_id":fb_user_id})
     forum_data = db.forum_post.find({"forum_id":  {"$gt":user_data["last_forum_id"]}  })
+    last_forum_data = db.forum_post.find_one({}, sort=[("forum_id", pymongo.DESCENDING)])
 
+    user_data["last_forum_id"] = last_forum_data["forum_id"]
+    user_data["last_active"] = time.time()
+    db.userinfo.update_one(user_data)
     forum_ids = [ each_el["forum_id"] for each_el in forum_data]
     return forum_ids, user_data["batch_forum_code"]
+
+
+def get_fourms_ids_search(search_string):
+    regx = re.compile(search_string, re.IGNORECASE)
+    matching_forum_data = db.forum_post.find({
+        "$or": [{
+                    "body": {'$regex':regx}
+                }, 
+                {
+                    "title": {'$regex':regx}
+                }]
+    }).sort([("forum_id", pymongo.DESCENDING)])
+
+    forum_ids = [ each_el["forum_id"] for each_el in matching_forum_data]
+    return forum_ids
+
+
 
 
 def generate_short_forum_texts(forum_ids, top_forum_code ):
