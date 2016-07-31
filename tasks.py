@@ -37,7 +37,7 @@ def fb_messenger_reply(user_id, msg):
         "message": {"text": msg}
     }
     try:
-    	resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + fb_tpobot_access_code, json=data)
+    	resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + fb_tpobot_access_code, json=data,headers={"Content-Type": "application/json"})
     except requests.exceptions.Timeout:
         logging.error("Request Timed Out, maybe server is busy")
         self.retry(countdown=2, exc=e, max_retries=10)

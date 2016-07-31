@@ -5,6 +5,7 @@ from flask import Flask, request
 from tasks import add
 from tasks import fb_messenger_reply
 import requests
+from tbot.facebook_messenger import get_users_name
 
 from pprint import pprint
 flask_app = Flask(__name__)
@@ -35,8 +36,10 @@ def handle_incoming_messages():
         for each_message in each_entry['messaging']:
             try:
                 sender = each_message['sender']['id']
+                user_name = get_users_name(sender)
+
                 message = each_message['message']['text']
-                fb_messenger_reply.apply_async((sender, message[::-1]))
+                fb_messenger_reply.apply_async((sender, "Hello "+ str(user_name[0])+",\n "+ message[::-1]))
             except KeyError:
                 pass
     return "ok"

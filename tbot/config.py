@@ -1,4 +1,5 @@
 import os
+from pymongo import MongoClient
 
 
 application_url = os.environ.get("OPENSHIFT_APP_DNS","") 
@@ -14,3 +15,6 @@ TPO_top_forum_id = 3
 push_bullet_url = "https://api.pushbullet.com/v2/pushes"
 push_bullet_group = "tpo_2016"
 push_bullet_token = os.environ.get("PUSHBULLET_AUTH_TOKEN","")
+
+
+mongo_client  = MongoClient(mongo_db_url)

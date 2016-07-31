@@ -3,7 +3,7 @@ import requests
 import logging
 from pprint import pprint
 from HTMLParser import HTMLParseError
-from tbot.config import mongo_db_url #TPO URL
+from tbot.config import mongo_client
 from tbot.config import TPO_forum_user_id #FORUM User Name
 from tbot.config import TPO_forum_user_passwd
 from tbot.config import TPO_top_forum_id #TPO Forum, top most 3 in this case
@@ -15,9 +15,6 @@ from tbot.forum_operations import forum_post_ids
 from tbot.forum_operations import get_forum_text
 
 
-from pymongo import MongoClient
-
-mongo_client  = MongoClient(mongo_db_url)
 db = mongo_client["placement_forum_data"]
 
 def update_db():
