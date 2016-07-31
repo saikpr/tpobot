@@ -4,8 +4,6 @@ from tbot.config import fb_tpobot_access_code
 import requests
 
 CELERY_BROKER = mongo_db_url 
-
-print CELERY_BROKER
 celery_app = Celery(__name__)
 
 celery_app.conf.update(

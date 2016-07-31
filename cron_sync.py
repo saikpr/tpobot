@@ -15,7 +15,7 @@ from tbot.forum_operations import forum_post_ids
 from tbot.forum_operations import get_forum_text
 
 
-db = mongo_client["placement_forum_data"]
+db = mongo_client["tpobot_db"]
 
 def update_db():
     global db
@@ -30,8 +30,8 @@ def update_db():
         return None
 
     for each_ele in top_forum_tuple:
-        if  db.forum_top.find({"forum_id":each_ele[0]}).count() == 0 :
-            db.forum_top.insert({"batch":each_ele[1],"forum_id":each_ele[0]})
+        if  db.forum_top.find({"forum_id":int(each_ele[0])}).count() == 0 :
+            db.forum_top.insert({"batch":each_ele[1],"forum_id":int(each_ele[0])})
         
         list_sub_forum = forum_post_ids(sid_php,each_ele[0])
         if  not top_forum_tuple:
@@ -39,16 +39,16 @@ def update_db():
             continue
 
         for each_forum in list_sub_forum:
-            if  db.forum_post.find({"post_id":each_forum}).count() == 0 :
-                forum_post_data = get_forum_text(sid_php,each_ele[0],each_forum)
-                if not forum_post_data:
+            if  db.forum_posts.find({"post_id":int(each_forum)}).count() == 0 :
+                forum_posts_data = get_forum_text(sid_php,each_ele[0],each_forum)
+                if not forum_posts_data:
                     print "ERROR" , each_ele[0], each_forum
                     continue
-                db.forum_post.insert({"title":forum_post_data[0],
-                                      "body":forum_post_data[1],
-                                      "url":forum_post_data[2],
-                                      "parent_forum":each_ele[0],
-                                      "post_id":each_forum})
+                db.forum_posts.insert({"title":forum_posts_data[0],
+                                      "body":forum_posts_data[1],
+                                      "url":forum_posts_data[2],
+                                      "parent_forum":int(each_ele[0]),
+                                      "post_id":int(each_forum)})
                 print each_ele[0], each_forum
 
 if __name__ == "__main__":

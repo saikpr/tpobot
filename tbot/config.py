@@ -18,3 +18,4 @@ push_bullet_token = os.environ.get("PUSHBULLET_AUTH_TOKEN","")
 
 
 mongo_client  = MongoClient(mongo_db_url)
+db_tpobot = mongo_client["tpobot_db"]

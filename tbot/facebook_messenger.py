@@ -2,28 +2,32 @@ import requests
 import logging
 from HTMLParser import HTMLParseError
 from .config import mongo_client
-from .config import fb_tpobot_access_code
+from .config import fb_tpobot_access_code, db_tpobot
 import time
 import re
+import pymongo
 
-
-db = mongo_client["facebook_messenger_user"]
+# db_tpobot = mongo_client["tpobot_db"]
 
 def check_user_activation(fb_user_id):
-    user_data = db.userinfo.find_one({"_id":fb_user_id})
+    user_data = db_tpobot.userinfo.find_one({"_id":fb_user_id})
     if not user_data:
         return False
-    if user_data["isvalid"] == False:
-        return False
+    
+    try:
+        return user_data["isvalid"] 
+    except KeyError:
+        pass
     return True
 
-def register_user(fb_user_id, user_name, group, emailid, forum_batch_code, last_forum_id):
-    if  not check_user_activation(fb_user_id) :
+def register_user(fb_user_id, first_name, last_name, group, emailid, forum_batch_code, last_forum_id):
+    if  check_user_activation(fb_user_id) :
         return False
 
     user_dict = {
             "_id":fb_user_id,
-            "name":user_name,
+            "first_name":first_name,
+            "last_name":last_name,
             "group":group,
             "email_id":emailid,
             "batch_forum_code":forum_batch_code,
@@ -31,65 +35,81 @@ def register_user(fb_user_id, user_name, group, emailid, forum_batch_code, last_
             "register_timestamp":time.time(),
             "last_active":time.time()
     }
-    tmp = db.userinfo.insert_one(user_dict)
+    tmp = db_tpobot.userinfo.insert_one(user_dict)
 
     return True
 
 def get_fourms_ids_user(fb_user_id):
     
-    if check_user_activation(fb_user_id):
+    if not check_user_activation(fb_user_id):
         return False
 
 
-    user_data = db.userinfo.find_one({"_id":fb_user_id})
-    forum_data = db.forum_post.find({"forum_id":  {"$gt":user_data["last_forum_id"]}  })
-    last_forum_data = db.forum_post.find_one({}, sort=[("forum_id", pymongo.DESCENDING)])
+    user_data = db_tpobot.userinfo.find_one({"_id":fb_user_id})
+    print user_data
+    forum_data = db_tpobot.forum_posts.find({"post_id":  {"$gt":user_data["last_forum_id"]}  })
+    print "forum_data"
+    print forum_data
+    # last_forum_data = db_tpobot.forum_posts.find_one( sort=[("post_id", pymongo.DESCENDING)])
+    
+    # print "last_forum_data"
+    # print last_forum_data
+    forum_ids = [ each_el["post_id"] for each_el in forum_data]
+    if forum_ids:
+        # print forum_ids
+        last_forum_id = sorted(forum_ids,reverse=True)[0]
 
-    user_data["last_forum_id"] = last_forum_data["forum_id"]
-    user_data["last_active"] = time.time()
-    db.userinfo.update_one(user_data)
-    forum_ids = [ each_el["forum_id"] for each_el in forum_data]
+        db_tpobot.userinfo.update_one(  
+            {"_id": fb_user_id},
+            {
+                "$set": {
+                    "last_forum_id": last_forum_id,
+                    "last_active":int(time.time())
+                }
+            })
+        
     return forum_ids, user_data["batch_forum_code"]
 
 
+
 def get_fourms_ids_search(search_string):
+    print search_string
     regx = re.compile(search_string, re.IGNORECASE)
-    matching_forum_data = db.forum_post.find({
+    print regx
+    matching_forum_data = db_tpobot.forum_posts.find({
         "$or": [{
-                    "body": {'$regex':regx}
+                    "body": {'$regex':search_string,"$options":"i"}
                 }, 
                 {
-                    "title": {'$regex':regx}
+                    "title": {'$regex':search_string,"$options":"i"}
                 }]
-    }).sort([("forum_id", pymongo.DESCENDING)])
+    }).sort([("post_id", pymongo.DESCENDING)])
 
-    forum_ids = [ each_el["forum_id"] for each_el in matching_forum_data]
+    forum_ids = [ each_el["post_id"] for each_el in matching_forum_data]
+    print forum_ids
     return forum_ids
 
 
 
 
-def generate_short_forum_texts(forum_ids, top_forum_code ):
-    if len(forum_ids) ==1:
-        return db.forum_post.find_one({"forum_id":forum_ids[0],"parent_forum":top_forum_code})["body"]
-    else:
-        return_str =""
-        for forum_number,forum_id in enumerate(forum_ids):
-            if forum_number>9:
-                break
-            forum_body = db.forum_post.find_one({"forum_ids":forum_ids[0],"parent_forum":top_forum_code})["body"]
-            new_forum_body = forum_body [:100]
-            new_forum_body = " ".join(new_forum_body.split(" ")[:-1])
-            return_str = return_str + "\n" +  str(forum_number+1) + str(new_forum_body)
-            if len(forum_body)>100:
-                return_str += "...."
-        return return_str
+def generate_short_forum_texts(forum_ids ):
+    for forum_number,each_forum in enumerate(forum_ids):
+        t = get_forum_title(each_forum)
+        yield forum_number+1,t
 
-def get_forum_text(forum_id, top_forum_code):
-    t =  db.forum_post.find_one({"forum_id":forum_id,"parent_forum":top_forum_code})
+def get_forum_body(forum_id):
+    t =  db_tpobot.forum_posts.find_one({"post_id":forum_id})
     if not t:
-        return False
+        return None
     return t["body"]
+
+
+def get_forum_title(forum_id):
+    t =  db_tpobot.forum_posts.find_one({"post_id":forum_id})
+    if not t:
+        return None
+    return t["title"]
+
 
 def get_users_name(fb_user_id):
     logging.debug('inside get_users_name with :'+str(fb_user_id))
