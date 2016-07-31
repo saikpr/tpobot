@@ -14,9 +14,7 @@ flask_app = Flask(__name__)
 
 # print fb_tpobot_access_code
 
-@flask_app.route('/', methods=['GET'])
-def handle_verification():
-    return request.args['hub.challenge']
+
 
 
 
@@ -27,8 +25,10 @@ def handle_v():
     print res
     return str(res)
 
-
-@flask_app.route('/', methods=['POST'])
+@flask_app.route('/messenger/webhook', methods=['GET'])
+def handle_verification():
+    return request.args['hub.challenge']
+@flask_app.route('/messenger/webhook', methods=['POST'])
 def handle_incoming_messages():
     data = request.json
     pprint( data)
