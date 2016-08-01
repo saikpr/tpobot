@@ -9,6 +9,7 @@ from .config import TPO_top_forum_id #TPO Forum, top most 3 in this case
 from .config import push_bullet_token
 from .config import push_bullet_url
 from .config import push_bullet_group
+from .config import my_user_agent
 
 def forum_direct_login():
     """To Login into the forum, using username and password"""
@@ -17,7 +18,7 @@ def forum_direct_login():
     global TPO_url ,TPO_forum_user_passwd ,TPO_forum_user_id
     
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:47.0) Gecko/20100101 Firefox/47.0",
+        "User-Agent": my_user_agent,
         "Content-Type": "application/x-www-form-urlencoded",
         }
     
@@ -64,7 +65,10 @@ def check_valid_sid(sid_php):
         return None
     global TPO_url 
     global TPO_top_forum_id
-
+    headers = {
+        "User-Agent": my_user_agent,
+        "Content-Type": "application/x-www-form-urlencoded",
+        }
     url = TPO_url + "/forum/viewforum.php?f=" + str(TPO_top_forum_id) +  "&sid=" + sid_php
     logging.info("URL For checking : "+url)
     logging.info("Trying To get the forum page")
@@ -96,7 +100,7 @@ def get_top_forums_ids(sid_php):
     global TPO_top_forum_id
     
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:47.0) Gecko/20100101 Firefox/47.0",
+        "User-Agent": my_user_agent,
         "Content-Type": "application/x-www-form-urlencoded",
         }
     #URL for TPO Forum
@@ -148,7 +152,7 @@ def get_top_forums_ids(sid_php):
     
     return list_of_forum_ids
 
-def forum_post_ids(sid_php,forum_sub_id):
+def forum_post_ids(sid_php,forum_sub_id,onlyonce=False):
     global TPO_url 
     global TPO_top_forum_id
     
@@ -158,10 +162,10 @@ def forum_post_ids(sid_php,forum_sub_id):
 
     logging.debug("Inside forum_data checking for : "+str(forum_sub_id))
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:47.0) Gecko/20100101 Firefox/47.0",
+        "User-Agent": my_user_agent,
         "Content-Type": "application/x-www-form-urlencoded",
         }
-    list_of_forum_ids = None
+    list_of_forum_ids = []
     for start_forum in xrange(0,1000,25):
         url = TPO_url+"/forum/viewforum.php?f="+str(forum_sub_id)+"&sid="+sid_php+"&start="+str(start_forum)
         logging.info("URL For forum_sub_id : "+url)
@@ -202,7 +206,8 @@ def forum_post_ids(sid_php,forum_sub_id):
                 list_of_forum_ids.append(temp)
             else:
                 return list_of_forum_ids
-
+        if onlyonce:
+            return list_of_forum_ids
         # list_of_forum_ids =[filter(lambda stri: stri[:2]=="t=", )[0][2:] for each_elem in forum_ids]
         
 
@@ -217,7 +222,7 @@ def get_forum_text (sid_php, forum_sub_id,forum_post_id):
         logging.error("Authetication cookienot found, shouldnt have reached here")
         return None
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:47.0) Gecko/20100101 Firefox/47.0",
+        "User-Agent": my_user_agent,
         "Content-Type": "application/x-www-form-urlencoded",
         }
     url = TPO_url+"/forum/viewtopic.php?f="+str(forum_sub_id)+"&t="+str(forum_post_id)+"&sid="+sid_php

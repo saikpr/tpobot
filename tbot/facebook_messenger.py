@@ -2,12 +2,14 @@ import requests
 import logging
 from HTMLParser import HTMLParseError
 from .config import mongo_client
-from .config import fb_tpobot_access_code, db_tpobot
+from .config import fb_tpobot_access_code
+from .config import  db_tpobot
+from .config import  strings_return_dict
 import time
 import re
 import pymongo
 
-# db_tpobot = mongo_client["tpobot_db"]
+
 
 def check_user_activation(fb_user_id):
     user_data = db_tpobot.userinfo.find_one({"_id":fb_user_id})
@@ -70,12 +72,15 @@ def get_fourms_ids_user(fb_user_id):
         
     return forum_ids, user_data["batch_forum_code"]
 
+def get_last_forum():
+    try:
+        return db_tpobot.forum_posts.find_one( sort=[("post_id", pymongo.DESCENDING)])["post_id" ]
+    except KeyError:
+        return 0
 
 
 def get_fourms_ids_search(search_string):
-    print search_string
-    regx = re.compile(search_string, re.IGNORECASE)
-    print regx
+    print list(search_string)
     matching_forum_data = db_tpobot.forum_posts.find({
         "$or": [{
                     "body": {'$regex':search_string,"$options":"i"}
@@ -93,22 +98,22 @@ def get_fourms_ids_search(search_string):
 
 
 def generate_short_forum_texts(forum_ids ):
-    for forum_number,each_forum in enumerate(forum_ids):
+    for forum_position,each_forum in enumerate(forum_ids):
         t = get_forum_title(each_forum)
-        yield forum_number+1,t
+        yield forum_position+1,t[0],t[1],each_forum
 
 def get_forum_body(forum_id):
     t =  db_tpobot.forum_posts.find_one({"post_id":forum_id})
     if not t:
         return None
-    return t["body"]
+    return t["body"],t["url"]
 
 
 def get_forum_title(forum_id):
     t =  db_tpobot.forum_posts.find_one({"post_id":forum_id})
     if not t:
         return None
-    return t["title"]
+    return t["title"],t["url"]
 
 
 def get_users_name(fb_user_id):
@@ -132,3 +137,47 @@ def get_users_name(fb_user_id):
     
     return user_details['first_name'],user_details['last_name']
     # ..... code to post message ...
+
+
+def help_message(user_name,fb_user_id):
+    if not check_user_activation(fb_user_id):
+        reply_message = [strings_return_dict["my_intro"],get_registration_help(user_name)[1], get_registration_help(user_name)[2],
+                    strings_return_dict["help_str"]]
+    else:
+        reply_message = [strings_return_dict["my_intro"], strings_return_dict["help_str"]]
+    return reply_message
+
+
+def hello_message(user_name,fb_user_id):
+    if not check_user_activation(fb_user_id):
+        reply_message = "Heya "+user_name[0]+ "\n\nWhattta you doing?\n\nOh sharks!!!, I dont know anything about you!\nType help for more info and registration"
+    else:
+        reply_message = "Heya "+user_name[0]+ "\n\nHow can i be of your help??"
+    return reply_message
+
+def get_top_forums():
+    top_forums = db_tpobot.forum_top.find().sort([("forum_id",pymongo.DESCENDING)])
+    return [(el["forum_id"],el["batch"]) for el in top_forums]
+
+def get_registration_help(user_name=None):
+    if not user_name:
+        user_name = ["Charlie","I dont know"]
+    top_forums = get_top_forums()
+    print top_forums
+    top_forumstr = ""
+    for each_rl in top_forums:
+        top_forumstr = top_forumstr + str(each_rl[0]) +" : "+str(each_rl[1]) +"\n"
+    reply_message = ["Hi "+(user_name[0])+"""\n\nThis is wrong, its all going wrong. \nI am unable to understand it \n\n Follow following instructions for registration""",
+        """To register type \n\nregister accesscode offcial_emailid batch_code forum_id\n\nbatch_code is dept and year, eg: cse12\n\nForum_id is defined as\n"""+
+        top_forumstr ,"""\nExample: register test_code sainyam.kapoor.cse12@iitbhu.ac.in cse12 165"""]
+    return reply_message
+
+def check_access_code(access_code):
+    t =  db_tpobot.fb_access_codes.find_one({"access_code":access_code})
+    if not t:
+        return False
+    try:
+        return t["isvalid"]
+    except KeyError:
+        pass
+    return True
