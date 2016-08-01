@@ -16,6 +16,7 @@ from tbot.facebook_messenger import get_forum_body, check_access_code
 from tbot.config import db_tpobot
 from tbot.config import strings_return_dict, MY_FB_ID
 import pymongo
+import os
 import time
 from pprint import pprint
 flask_app = Flask(__name__)
@@ -216,7 +217,8 @@ def handle_incoming_messages():
                                          )
                             reply_message = strings_return_dict["registration_success"]
                             fb_messenger_reply.apply_async((sender,reply_message))
-                            reply_message = help_message(user_name,sender)
+                            reply_send = True
+                            # reply_message = help_message(user_name,sender)
                         else:
                             reply_message = "Wrong Access_Code\n\n"+get_registration_help(user_name)[1]
                             
@@ -224,7 +226,12 @@ def handle_incoming_messages():
                 elif  ("help" in message.lower()):
                     reply_message=help_message(user_name,sender)
                     store_dict_this_chat["type"] = "help"
-
+                elif (("lala" in message.lower() or "jaja" in message.lower()) and (int(sender) == int(os.environ.get("DARLING_ID","")) or int(sender) == int(MY_FB_ID)) ):
+                    reply_message = os.environ.get("DARLING_MESSAGE","")
+                    reply_send = True
+                    fb_messenger_reply.apply_async((sender,reply_message))
+                    reply_message=""
+                    store_dict_this_chat["type"] = "lov"
                 elif check_user_activation(sender) is False: 
                     reply_message = hello_message(user_name, sender)
                     store_dict_this_chat["type"] = "not_registered"
@@ -247,7 +254,7 @@ def handle_incoming_messages():
                     
                     post_search_posts(sender, store_dict_this_chat,message)
                 elif ("more" in message.lower() or ("next" in message.lower())):
-                    reply_message,reply_send =  get_more(sender, store_dict_this_chat)
+                    reply_message, =  get_more(sender, store_dict_this_chat)
 
                 
                     
