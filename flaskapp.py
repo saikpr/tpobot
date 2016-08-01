@@ -190,7 +190,12 @@ def handle_incoming_messages():
                 reply_send = False
                 # print store_dict_this_chat
                 reply_message = ""
-                if ("register" in message.lower()):
+                if ("hi" in message.lower() or "hey" in message.lower() or "hello" in message.lower() or
+                        "howdy" in  message.lower()):
+                    print "received_hello"
+                    reply_message = hello_message(user_name, sender)
+                    store_dict_this_chat["type"] = "hello_registered"
+                elif ("register" in message.lower()):
                     store_dict_this_chat["type"] = "register"
                     
                     if check_user_activation(sender) is True:
@@ -244,11 +249,7 @@ def handle_incoming_messages():
                 elif ("more" in message.lower() or ("next" in message.lower())):
                     reply_message,reply_send =  get_more(sender, store_dict_this_chat)
 
-                elif ("hi" in message.lower() or "hey" in message.lower() or "hello" in message.lower() or
-                        "howdy" in  message.lower()):
-                    print "received_hello"
-                    reply_message = hello_message(user_name, sender)
-                    store_dict_this_chat["type"] = "hello_registered"
+                
                     
                 elif ("get" in message.lower()):
                     try:
@@ -298,7 +299,9 @@ def handle_incoming_messages():
                     store_dict_this_chat["type"] = "forum_body_return"
                 elif "GET_MORE" in postback_payload:
                     reply_message,reply_send =  get_more(sender, store_dict_this_chat)
-
+                elif "GET_STARTED_USER" in postback_payload:
+                    reply_message=help_message(user_name,sender)
+                    store_dict_this_chat["type"] = "help"
                 store_dict_this_chat["reply_timestamp"] = int(time.time())
                 store_dict_this_chat["reply"] = reply_message
                 # print store_dict_this_chat
