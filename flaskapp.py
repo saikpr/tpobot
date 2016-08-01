@@ -160,11 +160,7 @@ def post_get_update(sender, store_dict_this_chat,user_name) :
     return reply_message, reply_send
 @flask_app.route('/v', methods=['GET'])
 def handle_v():
-    k = add.delay(23,23)
-    res = k.get(timeout=5)
-    print res
-    return str(res)
-
+    return "Working"
 
 @flask_app.route('/messenger/webhook', methods=['GET'])
 def handle_verification():
