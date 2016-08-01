@@ -1,5 +1,5 @@
 from flask import Flask, request
-from tasks import add
+from tasks import cron_task
 from tasks import fb_messenger_reply
 import requests
 from tbot.facebook_messenger import get_users_name
@@ -27,7 +27,7 @@ from tbot.forum_operations import forum_post_ids
 from tbot.forum_operations import get_forum_text
 # db_tpobot = mongo_client["tpobot_db"]
 
-sid_php = forum_direct_login()
+
 
 # print fb_tpobot_access_code
 
@@ -172,40 +172,8 @@ def handle_verification():
 
 @flask_app.route("/crontpocheck")
 def cron_update():
-    global sid_php
-    if not check_valid_sid(sid_php):
-        sid_php = forum_direct_login()
-    if  not sid_php:
-        print "ERROR"
-        return None
-    top_forum_tuple = get_top_forums_ids(sid_php)
-    if  not top_forum_tuple:
-        print "ERROR"
-        return None
-    return_str = ""
-    for each_ele in top_forum_tuple:
-        if  db_tpobot.forum_top.find({"forum_id":int(each_ele[0])}).count() == 0 :
-            db_tpobot.forum_top.insert({"batch":each_ele[1],"forum_id":int(each_ele[0])})
-        
-        list_sub_forum = forum_post_ids(sid_php,each_ele[0],onlyonce=True)
-        if  not top_forum_tuple:
-            print "ERROR"
-            continue
-
-        for each_forum in list_sub_forum:
-            if  db_tpobot.forum_posts.find({"post_id":int(each_forum)}).count() == 0 :
-                forum_posts_data = get_forum_text(sid_php,each_ele[0],each_forum)
-                if not forum_posts_data:
-                    print "ERROR" , each_ele[0], each_forum
-                    continue
-                db_tpobot.forum_posts.insert({"title":forum_posts_data[0],
-                                      "body":forum_posts_data[1],
-                                      "url":forum_posts_data[2],
-                                      "parent_forum":int(each_ele[0]),
-                                      "post_id":int(each_forum)})
-                # print each_ele[0], each_forum
-        return_str+=str(list_sub_forum)
-    return return_str
+    cron_task.apply_async()
+    return "Ok"
 
 @flask_app.route('/messenger/webhook', methods=['POST'])
 def handle_incoming_messages():
