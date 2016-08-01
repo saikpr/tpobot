@@ -43,18 +43,19 @@ persistent_button_settings = {
   ]
 }
 
-
+MY_FB_ID = os.environ.get("MY_FB_ID","")
 
 strings_return_dict = {
     "user_registered":"Captain, You have already have registered\n\nI am afraid to say you cannot re-register at this time",
-    "registration_success":"Hi {user_name}\n\nYou are set :-)\n\nDisclaimer : This bot is not related to TPO or any other organisation",
+    "registration_success":"You are all set :-)\n\nDisclaimer : This bot is not related to TPO or any other organisation",
     "found_no_posts":"I am afraid, Charlie\n\nI am unable to find any posts, try again maybe?",
-    "get_more":"type 'more' to get more posts",
+    "get_more":"type or press 'more' to get more posts",
     "incorrect_number":"Charlie, Charlie, Charlie!!! \ntype the correct number or retry the query",
-    "no_more":"Charlie, I have no more posts for you",
+    "no_more":"Charlie, I have got no more posts for you",
     "no_updates" : "Yay {user_name}!!!, no new updates\n",
-    "my_intro" : """Hi, I am TPO BOT. Your stupid little help.\n\n""",
-    "help_str" : """To get updates from previous run, type "get updates" \nTo search, type "search <string>"\nexample: search sainyam\nMisc : Say "hi","""
+    "my_intro" : """Hola, I am TPOBOT. I will try to help you.""",
+    "help_str" : """To get new posts, type "get updates" \nTo search, type "search <string>"\nexample: search sainyam\nSay "hi"\nTo provide feedback: feedback your_message""",
+    "unable_to_understand" : "Either that's too cryptic or I am an idiot or both. \nI am soo confused!!!!!!!\n\ntype help for more info"
 
 }
 

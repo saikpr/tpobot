@@ -22,7 +22,7 @@ def check_user_activation(fb_user_id):
         pass
     return True
 
-def register_user(fb_user_id, first_name, last_name, group, emailid, forum_batch_code, last_forum_id):
+def register_user(fb_user_id, first_name, last_name, group=None, emailid=None, forum_batch_code=None, last_forum_id=None):
     if  check_user_activation(fb_user_id) :
         return False
 
@@ -30,13 +30,19 @@ def register_user(fb_user_id, first_name, last_name, group, emailid, forum_batch
             "_id":fb_user_id,
             "first_name":first_name,
             "last_name":last_name,
-            "group":group,
-            "email_id":emailid,
-            "batch_forum_code":forum_batch_code,
-            "last_forum_id":last_forum_id,
             "register_timestamp":time.time(),
             "last_active":time.time()
     }
+    if group:
+        user_dict["group"]=group
+    if emailid:    
+        user_dict["email_id"]=emailid
+    if forum_batch_code:        
+        user_dict["batch_forum_code"]=forum_batch_code
+    if last_forum_id:
+        user_dict["last_forum_id"]=last_forum_id
+    else:
+        user_dict["last_forum_id"]=get_last_forum()-2
     tmp = db_tpobot.userinfo.insert_one(user_dict)
 
     return True
@@ -69,8 +75,8 @@ def get_fourms_ids_user(fb_user_id):
                     "last_active":int(time.time())
                 }
             })
-        
-    return forum_ids, user_data["batch_forum_code"]
+    print forum_ids 
+    return forum_ids
 
 def get_last_forum():
     try:
@@ -141,7 +147,7 @@ def get_users_name(fb_user_id):
 
 def help_message(user_name,fb_user_id):
     if not check_user_activation(fb_user_id):
-        reply_message = [strings_return_dict["my_intro"],get_registration_help(user_name)[1], get_registration_help(user_name)[2],
+        reply_message = [strings_return_dict["my_intro"],get_registration_help(user_name)[1],
                     strings_return_dict["help_str"]]
     else:
         reply_message = [strings_return_dict["my_intro"], strings_return_dict["help_str"]]
@@ -150,7 +156,7 @@ def help_message(user_name,fb_user_id):
 
 def hello_message(user_name,fb_user_id):
     if not check_user_activation(fb_user_id):
-        reply_message = "Heya "+user_name[0]+ "\n\nWhattta you doing?\n\nOh sharks!!!, I dont know anything about you!\nType help for more info and registration"
+        reply_message = "Heya "+user_name[0]+ "\n\nWhattta you doing?\n\nOh sharks!!!, I dont know anything about you!\nType 'help' for more info and registration"
     else:
         reply_message = "Heya "+user_name[0]+ "\n\nHow can i be of your help??"
     return reply_message
@@ -167,9 +173,8 @@ def get_registration_help(user_name=None):
     top_forumstr = ""
     for each_rl in top_forums:
         top_forumstr = top_forumstr + str(each_rl[0]) +" : "+str(each_rl[1]) +"\n"
-    reply_message = ["Hi "+(user_name[0])+"""\n\nThis is wrong, its all going wrong. \nI am unable to understand it \n\n Follow following instructions for registration""",
-        """To register type \n\nregister accesscode offcial_emailid batch_code forum_id\n\nbatch_code is dept and year, eg: cse12\n\nForum_id is defined as\n"""+
-        top_forumstr ,"""\nExample: register test_code sainyam.kapoor.cse12@iitbhu.ac.in cse12 165"""]
+    reply_message = ["Hi "+(user_name[0])+"""\n\nThis is wrong, its all going wrong. \nI am unable to understand it""",
+        """To register type \n\nregister access_code """ ]
     return reply_message
 
 def check_access_code(access_code):

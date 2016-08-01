@@ -12,9 +12,9 @@ from tbot.facebook_messenger import help_message
 from tbot.facebook_messenger import get_registration_help
 from tbot.facebook_messenger import get_last_forum
 from tbot.facebook_messenger import hello_message
-from tbot.facebook_messenger import get_forum_body
+from tbot.facebook_messenger import get_forum_body, check_access_code
 from tbot.config import db_tpobot
-from tbot.config import strings_return_dict
+from tbot.config import strings_return_dict, MY_FB_ID
 import pymongo
 import time
 from pprint import pprint
@@ -28,7 +28,7 @@ from tbot.forum_operations import get_forum_text
 # db_tpobot = mongo_client["tpobot_db"]
 
 
-
+FORUM_COUNT = 5
 # print fb_tpobot_access_code
 
 
@@ -71,15 +71,15 @@ def push_post_sender(forum_id,sender):
 
 def push_forum_ids(sender,forum_ids,start_count=0):
     temp_list = list()
-    print forum_ids[start_count:start_count+10]
-    for each_title in generate_short_forum_texts(forum_ids[start_count:start_count+10] ):
+    print forum_ids[start_count:start_count+FORUM_COUNT]
+    for each_title in generate_short_forum_texts(forum_ids[start_count:start_count+FORUM_COUNT] ):
         # print each_title
         msg = str(each_title[0])+" : " + each_title[1]
         temp_list.append(msg)
-        # sleep(0.1)
-        fb_messenger_reply.apply_async((sender, msg),dict(url=each_title[2],button="GET_BODY_POST_"+str(each_title[3])))   
-    if len(forum_ids) - start_count>10:
-        fb_messenger_reply.apply_async((sender, strings_return_dict["get_more"]))
+        sleep(0.1)
+        fb_messenger_reply.apply_async((sender, msg),dict(url=each_title[2],button="GET_BODY_POST_"+str(each_title[3]),button_str="View"))   
+    if len(forum_ids) - start_count>FORUM_COUNT:
+        fb_messenger_reply.apply_async((sender, strings_return_dict["get_more"]),dict(button="GET_MORE",button_str="More"))
         # strings_return_dict["get_more"]
         temp_list.append(strings_return_dict["get_more"])
     return temp_list
@@ -106,8 +106,8 @@ def get_more(sender, store_dict_this_chat):
             else:
                 store_dict_this_chat["forum_list_last_count"] = len(forum_ids)
                 
-                if len(forum_ids) - last_chat["forum_list_last_count"]>10:
-                    store_dict_this_chat["forum_list_last_count"] = last_chat["forum_list_last_count"] +  10
+                if len(forum_ids) - last_chat["forum_list_last_count"]>FORUM_COUNT:
+                    store_dict_this_chat["forum_list_last_count"] = last_chat["forum_list_last_count"] +  FORUM_COUNT
                 reply_send =True
     except KeyError:
         reply_message = strings_return_dict["no_more"]
@@ -132,19 +132,19 @@ def post_search_posts(sender, store_dict_this_chat,message):
         reply_message = strings_return_dict['found_no_posts']
     else:
         store_dict_this_chat["forum_list_last_count"] = len(forum_ids)
-        if len(forum_ids)>10:
-            store_dict_this_chat["forum_list_last_count"] = 10
+        if len(forum_ids)>FORUM_COUNT:
+            store_dict_this_chat["forum_list_last_count"] = FORUM_COUNT
         reply_message = push_forum_ids(sender,forum_ids)
         reply_send =True
     return reply_message, reply_send    
 
 
 def post_get_update(sender, store_dict_this_chat,user_name) :
-    forum_ids,top_forum_code = get_fourms_ids_user(sender)
+    forum_ids = get_fourms_ids_user(sender)
     store_dict_this_chat["forum_list"] = forum_ids
     store_dict_this_chat["forum_list_length"] = len(forum_ids)
     store_dict_this_chat["type"] = "forum_list"
-    # print forum_ids
+    print forum_ids
     reply_send =False
 
     if len(forum_ids)==0:
@@ -154,9 +154,11 @@ def post_get_update(sender, store_dict_this_chat,user_name) :
         
         reply_message = push_forum_ids(sender,forum_ids)
         reply_send =True
-        if len(forum_ids)>10:
-            store_dict_this_chat["forum_list_last_count"] = 10
-            reply_message.append("type 'more' to get more posts")
+        if len(forum_ids)>FORUM_COUNT:
+            store_dict_this_chat["forum_list_last_count"] = FORUM_COUNT
+            reply_message.append(strings_return_dict["get_more"])
+    print str(reply_message)
+    # print store_dict_this_chatt
     return reply_message, reply_send
 @flask_app.route('/v', methods=['GET'])
 def handle_v():
@@ -193,25 +195,26 @@ def handle_incoming_messages():
                     
                     if check_user_activation(sender) is True:
                         reply_message = strings_return_dict["user_registered"]
-                    else:
+                    else :
                         reg_message = message.split(" ")
-                        if len(reg_message)!= 5:
+                        if len(reg_message)!= 2:
                             reply_message = get_registration_help(user_name)
-                        elif not is_number(reg_message[4]):
-                            reply_message = get_registration_help(user_name)
-                        elif ("iitbhu.ac.in" in reg_message[2] or "itbhu.ac.in" in reg_message[2] ):
+                        elif check_access_code(reg_message[1]):
                             
                             register_user(fb_user_id=sender,
                                          first_name = user_name[0],
-                                         last_name =user_name[1],
-                                         group =reg_message[2],
-                                         emailid=reg_message[2],
-                                         forum_batch_code=reg_message[4],
-                                         last_forum_id=get_last_forum())
-
-                            reply_message = strings_return_dict["registration_success"].format(user_name = user_name[0])
+                                         last_name =user_name[1]
+                                         # group =reg_message[2],
+                                         # emailid=reg_message[2],
+                                         # forum_batch_code=reg_message[4],
+                                         # last_forum_id=get_last_forum()
+                                         )
+                            reply_message = strings_return_dict["registration_success"]
+                            fb_messenger_reply.apply_async((sender,reply_message))
+                            reply_message = help_message(user_name,sender)
                         else:
-                            reply_message = get_registration_help(user_name)
+                            reply_message = "Wrong Access_Code\n\n"+get_registration_help(user_name)[1]
+                            
                     # print reply_message
                 elif  ("help" in message.lower()):
                     reply_message=help_message(user_name,sender)
@@ -239,7 +242,7 @@ def handle_incoming_messages():
                     
                     post_search_posts(sender, store_dict_this_chat,message)
                 elif ("more" in message.lower() or ("next" in message.lower())):
-                    reply_message,reply_send = reply_message,reply_send = get_more(sender, store_dict_this_chat)
+                    reply_message,reply_send =  get_more(sender, store_dict_this_chat)
 
                 elif ("hi" in message.lower() or "hey" in message.lower() or "hello" in message.lower() or
                         "howdy" in  message.lower()):
@@ -248,11 +251,17 @@ def handle_incoming_messages():
                     store_dict_this_chat["type"] = "hello_registered"
                     
                 elif ("get" in message.lower()):
-                    reply_message,reply_send =  post_get_update(sender, store_dict_this_chat,user_name)
-                
-
+                    try:
+                        reply_message,reply_send =  post_get_update(sender, store_dict_this_chat,user_name)
+                    except Exception as e:
+                        print e
+                    # fb_messenger_reply.apply_async((sender, reply_message))
+                elif ("feedback" in message.lower()):
+                    reply_message = "Thanks for your feedback"
+                    fb_messenger_reply.apply_async((MY_FB_ID, message))
+                    
                 else:
-                    reply_message = "Either that's too cryptic or I am an idiot or both. \nI am soo confused!!!!!!!\n\ntype help for more info"
+                    reply_message = strings_return_dict["unable_to_understand"]
                 
                 store_dict_this_chat["reply_timestamp"] = int(time.time())
                 store_dict_this_chat["reply"] = reply_message
@@ -276,7 +285,7 @@ def handle_incoming_messages():
                 reply_message = ""
                 reply_send =False
                 if postback_payload == "PAYLOAD_FOR_UPDATES":
-                    reply_message = "Not Implemented"
+                    reply_message,reply_send =  post_get_update(sender, store_dict_this_chat,user_name)
 
                 elif postback_payload == "PAYLOAD_FOR_HELP":
                     # help_message
@@ -287,6 +296,8 @@ def handle_incoming_messages():
                     reply_message = push_post_sender(forum_id,sender)
                     reply_send = True
                     store_dict_this_chat["type"] = "forum_body_return"
+                elif "GET_MORE" in postback_payload:
+                    reply_message,reply_send =  get_more(sender, store_dict_this_chat)
 
                 store_dict_this_chat["reply_timestamp"] = int(time.time())
                 store_dict_this_chat["reply"] = reply_message

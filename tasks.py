@@ -68,7 +68,7 @@ def cron_task():
         return_str += str(list_sub_forum)
     logging.info(return_str)
     logging.info("Cron RUN")
-def fb_send_message(user_id,msg,url=None,button=None):
+def fb_send_message(user_id,msg,url=None,button=None,button_str="More"):
     data = {
         "recipient": {"id": user_id},
         "message": {"text": msg}
@@ -110,7 +110,7 @@ def fb_send_message(user_id,msg,url=None,button=None):
                                   },
                                   {
                                     "type":"postback",
-                                    "title":"Get Body",
+                                    "title":button_str,
                                     "payload":button
                                   }
                                 ]
@@ -129,7 +129,7 @@ def fb_send_message(user_id,msg,url=None,button=None):
                                 [
                                   {
                                     "type":"postback",
-                                    "title":"Get Body",
+                                    "title":button_str,
                                     "payload":button
                                   }
                                 ]
@@ -149,9 +149,9 @@ def fb_send_message(user_id,msg,url=None,button=None):
         self.retry(countdown=2, exc=e, max_retries=3)
 
 @celery_app.task()
-def fb_messenger_reply(user_id, msg, url=None,button=None):
+def fb_messenger_reply(user_id, msg, url=None,button=None,button_str="More"):
     if isinstance(msg, basestring):
-        fb_send_message(user_id,msg,url,button)
+        fb_send_message(user_id,msg,url,button,button_str)
     else:
         for each_msg in msg:
             # print each_msg
