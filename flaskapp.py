@@ -1,3 +1,4 @@
+import traceback
 from flask import Flask, request
 from tasks import cron_task
 from tasks import fb_messenger_reply
@@ -281,6 +282,17 @@ def handle_incoming_messages():
             except KeyError:
                 
                 pass
+            except Exception as e:
+                print "ERROR_FOR_SAINYAM"
+                print (traceback.format_exc())
+                try:
+                    sender = each_message['sender']['id']
+                    # user_name = get_users_name(sender)
+                    reply_message = strings_return_dict["failing_everything"]
+                    fb_messenger_reply.apply_async((sender, reply_message))
+                    fb_messenger_reply.apply_async((MY_FB_ID, "I have failed you "+str(e)))
+                except KeyError:
+                    pass
             try:
                 pprint( each_message)
                 sender = each_message['sender']['id']
@@ -319,4 +331,15 @@ def handle_incoming_messages():
             except KeyError:
                 
                 pass
+            except Exception as e:
+                print "ERROR_FOR_SAINYAM"
+                print (traceback.format_exc())
+                try:
+                    sender = each_message['sender']['id']
+                    # user_name = get_users_name(sender)
+                    reply_message = strings_return_dict["failing_everything"]
+                    fb_messenger_reply.apply_async((sender, reply_message))
+                    fb_messenger_reply.apply_async((MY_FB_ID, "I have failed you "+str(e)))
+                except KeyError:
+                    pass
     return "ok"

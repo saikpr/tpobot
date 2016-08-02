@@ -55,7 +55,8 @@ strings_return_dict = {
     "no_updates" : "Yay {user_name}!!!, no new updates\n",
     "my_intro" : """hola, i am tpobot. i will try to help you.""",
     "help_str" : """To get new posts, type "get updates" \nto search, type "search <string>"\nexample: search sainyam\nsay "hi"\nTo provide feedback: feedback your_message""",
-    "unable_to_understand" : "Either that's too cryptic or I am an idiot or both. \nI am soo confused!!!!!!!\n\ntype help for more info"
+    "unable_to_understand" : "Either that's too cryptic or I am an idiot or both. \nI am soo confused!!!!!!!\n\ntype help for more info",
+    "failing_everything" : "Monsoon is around the corner and I hate rain\n\nCharlie I am afraid to tell you that I am going to let you down \nContact Sainyam Kapoor and tell him about this"
 }
 
 my_user_agent = "tpobot v0.1"
