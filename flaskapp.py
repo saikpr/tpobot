@@ -75,7 +75,7 @@ def push_forum_ids(sender,forum_ids,start_count=0):
     print forum_ids[start_count:start_count+FORUM_COUNT]
     for each_title in generate_short_forum_texts(forum_ids[start_count:start_count+FORUM_COUNT] ):
         # print each_title
-        msg = str(each_title[0])+" : " + each_title[1]
+        msg =  each_title[1]
         temp_list.append(msg)
         sleep(0.1)
         fb_messenger_reply.apply_async((sender, msg),dict(url=each_title[2],button="GET_BODY_POST_"+str(each_title[3]),button_str="View"))   

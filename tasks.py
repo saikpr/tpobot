@@ -1,10 +1,15 @@
 from celery import Celery
 from tbot.config import mongo_db_url
 from tbot.config import fb_tpobot_access_code, db_tpobot
-from tbot.forum_operations import forum_direct_login, check_valid_sid, get_top_forums_ids, get_forum_text, forum_post_ids
+from tbot.forum_operations import forum_direct_login
+from tbot.forum_operations import check_valid_sid
+from tbot.forum_operations import get_top_forums_ids
+from tbot.forum_operations import get_forum_text
+from tbot.forum_operations import forum_post_ids
 import requests
 import logging
 from celery.utils.log import get_task_logger
+from time import sleep
 logger = get_task_logger(__name__)
 CELERY_BROKER = mongo_db_url 
 celery_app = Celery(__name__)
@@ -154,7 +159,7 @@ def fb_messenger_reply(user_id, msg, url=None,button=None,button_str="More"):
         fb_send_message(user_id,msg,url,button,button_str)
     else:
         for each_msg in msg:
-            # print each_msg
+            sleep(0.1)
             fb_send_message(user_id,each_msg)
     
 

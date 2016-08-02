@@ -174,7 +174,7 @@ def get_registration_help(user_name=None):
     for each_rl in top_forums:
         top_forumstr = top_forumstr + str(each_rl[0]) +" : "+str(each_rl[1]) +"\n"
     reply_message = ["Hi "+(user_name[0])+"""\n\nThis is wrong, its all going wrong. \nI am unable to understand it""",
-        """To register type \n\nregister access_code """ ]
+        """To register type \n\n'register access_code'\n(Without quotes) """ ]
     return reply_message
 
 def check_access_code(access_code):
