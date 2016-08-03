@@ -143,11 +143,19 @@ def post_search_posts(sender, store_dict_this_chat,message):
 
 def post_get_update(sender, store_dict_this_chat,user_name) :
     forum_ids = get_fourms_ids_user(sender)
+
+                    # store_dict_this_chat["type"] = "not_registered"
+    if forum_ids == False:
+        reply_message = hello_message(user_name, sender)
+        store_dict_this_chat["type"] = "not_registered"
+        reply_send =False
+        return reply_message, reply_send
     store_dict_this_chat["forum_list"] = forum_ids
     store_dict_this_chat["forum_list_length"] = len(forum_ids)
     store_dict_this_chat["type"] = "forum_list"
     print forum_ids
     reply_send =False
+
 
     if len(forum_ids)==0:
        reply_message = strings_return_dict["no_updates"].format(user_name = user_name[0])
