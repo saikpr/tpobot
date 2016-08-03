@@ -46,7 +46,7 @@ def push_post_sender(forum_id,sender):
     print "push_post_sender"
     forum_text = get_forum_body(forum_id)
     print forum_text
-    fb_messenger_reply.apply_async((sender,forum_text[0][:300]),dict(url=forum_text[1]))
+    fb_messenger_reply.apply_async((sender,forum_text[0][:300]+"......."),dict(url=forum_text[1]))
     return forum_text
 
 # def got_number(post_number,sender):
@@ -153,7 +153,7 @@ def post_get_update(sender, store_dict_this_chat,user_name) :
        reply_message = strings_return_dict["no_updates"].format(user_name = user_name[0])
     else:
         
-        
+        store_dict_this_chat["forum_list_last_count"] = len(forum_ids)
         reply_message = push_forum_ids(sender,forum_ids)
         reply_send =True
         if len(forum_ids)>FORUM_COUNT:
@@ -219,6 +219,7 @@ def handle_incoming_messages():
                             reply_message = strings_return_dict["registration_success"]
                             fb_messenger_reply.apply_async((sender,reply_message))
                             reply_send = True
+                            fb_messenger_reply.apply_async((MY_FB_ID, "Registered :"+str(user_name)))
                             # reply_message = help_message(user_name,sender)
                         else:
                             reply_message = "Wrong Access_Code\n\n"+get_registration_help(user_name)[1]
@@ -255,7 +256,7 @@ def handle_incoming_messages():
                     
                     post_search_posts(sender, store_dict_this_chat,message)
                 elif ("more" in message.lower() or ("next" in message.lower())):
-                    reply_message, =  get_more(sender, store_dict_this_chat)
+                    reply_message,reply_send =  get_more(sender, store_dict_this_chat)
 
                 
                     

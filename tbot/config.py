@@ -47,7 +47,7 @@ MY_FB_ID = os.environ.get("MY_FB_ID","")
 
 strings_return_dict = {
     "user_registered":"Captain, You are already registered\n\nI am afraid to say you cannot re-register at this time",
-    "registration_success":"You are all set :-)\n\nTo see it working type 'get updates' or press the button 'Get updates' next to textbox\n\nDisclaimer : This bot is not related to TPO or any other organisation",
+    "registration_success":"You are all set :-)\n\nTo see it working type 'get updates' or press the button 'Get updates' next to textbox\n\nor type 'search microsoft'(without quotes)\n\nDisclaimer : This bot is not related to TPO or any other organisation",
     "found_no_posts":"I am afraid, Charlie\n\nI am unable to find you any posts, try again maybe?",
     "get_more":"type or press 'more' to get more posts",
     "incorrect_number":"Charlie, Charlie, Charlie!!! \ntype the correct number or retry the query",
