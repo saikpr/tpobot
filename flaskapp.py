@@ -2,6 +2,7 @@ import traceback
 from flask import Flask, request
 from tasks import cron_task
 from tasks import fb_messenger_reply
+from tasks import push_post_sender
 import requests
 from tbot.facebook_messenger import get_users_name
 from tbot.facebook_messenger import check_user_activation
@@ -13,7 +14,11 @@ from tbot.facebook_messenger import help_message
 from tbot.facebook_messenger import get_registration_help
 from tbot.facebook_messenger import get_last_forum
 from tbot.facebook_messenger import hello_message
-from tbot.facebook_messenger import get_forum_body, check_access_code
+from tbot.facebook_messenger import get_forum_body
+from tbot.facebook_messenger import check_access_code 
+from tbot.facebook_messenger import activate_push_notification 
+from tbot.facebook_messenger import deactivate_push_notification 
+from tbot.facebook_messenger import check_push_notification
 from tbot.config import db_tpobot
 from tbot.config import strings_return_dict, MY_FB_ID
 import pymongo
@@ -42,12 +47,6 @@ def is_number(s):
     except ValueError:
         return False
 
-def push_post_sender(forum_id,sender):
-    print "push_post_sender"
-    forum_text = get_forum_body(forum_id)
-    print forum_text
-    fb_messenger_reply.apply_async((sender,forum_text[0][:300]+"......."),dict(url=forum_text[1]))
-    return forum_text
 
 # def got_number(post_number,sender):
 #     last_chat = db_tpobot.chat_history.find_one({"type":"forum_list","sender":sender} ,
@@ -170,6 +169,34 @@ def post_get_update(sender, store_dict_this_chat,user_name) :
     print str(reply_message)
     # print store_dict_this_chatt
     return reply_message, reply_send
+
+
+def push_notfication_on(sender):
+    reply_message = ""
+    if check_user_activation(sender) is False:
+        reply_message = "You are not registered"
+    else:
+        if activate_push_notification(sender):
+            reply_message = strings_return_dict["push_activated"]
+
+        else:
+            reply_message = "Some Error, try registering"
+    return reply_message
+
+
+def push_notfication_off(sender):
+    reply_message = ""
+    if check_user_activation(sender) is False:
+        reply_message = "You are not registered"
+    else:
+        if deactivate_push_notification(sender):
+            reply_message = strings_return_dict["push_deactivated"]
+
+        else:
+            reply_message = "Some Error, try registering"
+    return reply_message
+
+
 @flask_app.route('/v', methods=['GET'])
 def handle_v():
     return "Working"
@@ -227,7 +254,10 @@ def handle_incoming_messages():
                             reply_message = strings_return_dict["registration_success"]
                             fb_messenger_reply.apply_async((sender,reply_message))
                             reply_send = True
-                            fb_messenger_reply.apply_async((MY_FB_ID, "Registered :"+str(user_name)))
+                            temp_str = push_notfication_on(sender)
+                            reply_message+=temp_str
+                            fb_messenger_reply.apply_async((sender,temp_str))
+                            fb_messenger_reply.apply_async((MY_FB_ID, "Registered : "+str(user_name)))
                             # reply_message = help_message(user_name,sender)
                         else:
                             reply_message = "Wrong Access_Code\n\n"+get_registration_help(user_name)[1]
@@ -277,6 +307,12 @@ def handle_incoming_messages():
                 elif ("feedback" in message.lower()):
                     reply_message = "Thanks for your feedback"
                     fb_messenger_reply.apply_async((MY_FB_ID, message))
+                
+                elif ("push" in message.lower() and ("off" in message.lower() or "deactivate" in message.lower())):
+                    reply_message = push_notfication_on(sender)
+
+                elif ("push" in message.lower() and ("on" in message.lower() or "activate" in message.lower())):
+                    reply_message = push_notfication_on(sender)
                     
                 else:
                     reply_message = strings_return_dict["unable_to_understand"]

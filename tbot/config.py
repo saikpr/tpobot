@@ -54,9 +54,11 @@ strings_return_dict = {
     "no_more":"Charlie, i have got no more posts for you",
     "no_updates" : "Yay {user_name}!!!, no new updates\n",
     "my_intro" : """hola, i am tpobot. i will try to help you.""",
-    "help_str" : """To get new posts, type "get updates" \nto search, type "search <string>"\nexample: search sainyam\nsay "hi"\nTo provide feedback: feedback your_message""",
+    "help_str" : """To get new posts, type "get updates" \nto search, type "search <string>"\nexample: search sainyam\nsay "hi"\nTo provide feedback: feedback your_message\n\nTo deactivate push notifications:'push off'\nTo activate push notifications:'push on'""",
     "unable_to_understand" : "Either that's too cryptic or I am an idiot or both. \nI am soo confused!!!!!!!\n\ntype help for more info",
-    "failing_everything" : "Monsoon is around the corner and I hate rain\n\nCharlie I am afraid to tell you that I am going to let you down \nContact Sainyam Kapoor and tell him about this"
+    "failing_everything" : "Monsoon is around the corner and I hate rain\n\nCharlie I am afraid to tell you that I am going to let you down \nContact Sainyam Kapoor and tell him about this",
+    "push_activated" : "Activated Push Notifications.\n\nDon't want it ? Type:\n\npush off",
+    "push_deactivated" : "Deactivated Push Notifications.\n\Want it ? Type:\n\npush on"
 }
 
 my_user_agent = "tpobot v0.1"

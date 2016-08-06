@@ -57,7 +57,7 @@ def get_fourms_ids_user(fb_user_id):
     print user_data
     forum_data = db_tpobot.forum_posts.find({"post_id":  {"$gt":user_data["last_forum_id"]}  })
     print "forum_data"
-    print forum_data
+    # print forum_data
     # last_forum_data = db_tpobot.forum_posts.find_one( sort=[("post_id", pymongo.DESCENDING)])
     
     # print "last_forum_data"
@@ -186,3 +186,40 @@ def check_access_code(access_code):
     except KeyError:
         pass
     return True
+
+def activate_push_notification(fb_user_id):
+    user_data = db_tpobot.userinfo.find_one({"_id":fb_user_id})
+    if not user_data:
+        return False
+    db_tpobot.userinfo.update_one(  
+            {"_id": fb_user_id},
+            {
+                "$set": {
+                    "pushnotifications": True
+                }
+            })
+    return True
+
+def deactivate_push_notification(fb_user_id):
+    user_data = db_tpobot.userinfo.find_one({"_id":fb_user_id})
+    if not user_data:
+        return False
+    db_tpobot.userinfo.update_one(  
+            {"_id": fb_user_id},
+            {
+                "$set": {
+                    "pushnotifications": False
+                }
+            })
+    return True
+
+def check_push_notification(fb_user_id):
+    user_data = db_tpobot.userinfo.find_one({"_id":fb_user_id})
+    if not user_data:
+        return False
+    try:
+        return user_data["pushnotifications"] 
+    except KeyError:
+        pass
+    return False
+

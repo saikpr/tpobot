@@ -6,6 +6,7 @@ from tbot.forum_operations import check_valid_sid
 from tbot.forum_operations import get_top_forums_ids
 from tbot.forum_operations import get_forum_text
 from tbot.forum_operations import forum_post_ids
+from tbot.facebook_messenger import get_forum_body, check_user_activation,get_fourms_ids_user
 import requests
 import logging
 from celery.utils.log import get_task_logger
@@ -34,6 +35,12 @@ celery_app.conf.update(
 
 )
 
+def push_post_sender(forum_id,sender):
+    print "push_post_sender"
+    forum_text = get_forum_body(forum_id)
+    # print forum_text
+    fb_messenger_reply.apply_async((sender,forum_text[0][:300]+"......."),dict(url=forum_text[1]))
+    return forum_text
 
 @celery_app.task
 def cron_task():
@@ -51,25 +58,43 @@ def cron_task():
         return None
     return_str = ""
     for each_ele in top_forum_tuple:
+        if  not top_forum_tuple:
+            print "ERROR"
+            continue
         if  db_tpobot.forum_top.find({"forum_id":int(each_ele[0])}).count() == 0 :
             db_tpobot.forum_top.insert({"batch":each_ele[1],"forum_id":int(each_ele[0])})
         
         list_sub_forum = forum_post_ids(sid_php,each_ele[0],onlyonce=True)
-        if  not top_forum_tuple:
-            print "ERROR"
-            continue
+        
+        list_sub_forum = [int(x) for x in list_sub_forum]
 
-        for each_forum in list_sub_forum:
-            if  db_tpobot.forum_posts.find({"post_id":int(each_forum)}).count() == 0 :
-                forum_posts_data = get_forum_text(sid_php,each_ele[0],each_forum)
-                if not forum_posts_data:
-                    print "ERROR" , each_ele[0], each_forum
-                    continue
-                db_tpobot.forum_posts.insert({"title":forum_posts_data[0],
-                                      "body":forum_posts_data[1],
-                                      "url":forum_posts_data[2],
-                                      "parent_forum":int(each_ele[0]),
-                                      "post_id":int(each_forum)})
+        all_posts_val = db_tpobot.forum_posts.find()
+
+        all_posts_ids = [int(x["post_id"]) for x in all_posts_val]
+
+        to_push_set = set(list_sub_forum) - set(all_posts_ids)
+
+
+        for each_forum in to_push_set:
+            forum_posts_data = get_forum_text(sid_php,each_ele[0],each_forum)
+            if not forum_posts_data:
+                print "ERROR" , each_ele[0], each_forum
+                continue
+            db_tpobot.forum_posts.insert({"title":forum_posts_data[0],
+                                  "body":forum_posts_data[1],
+                                  "url":forum_posts_data[2],
+                                  "parent_forum":int(each_ele[0]),
+                                  "post_id":int(each_forum)})
+
+        users_data = db_tpobot.userinfo.find({"pushnotifications":True})
+        users_id = [x["_id"] for x in users_data]
+        for each_user in users_id:
+            if check_user_activation(each_user):
+                user_unpushed_posts = get_fourms_ids_user(each_user)
+                if user_unpushed_posts:
+                    for each_post in user_unpushed_posts:
+                        push_post_sender(forum_id=each_post,sender=each_user)
+
         return_str += str(list_sub_forum)
     logging.info(return_str)
     logging.info("Cron RUN")
