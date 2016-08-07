@@ -2,7 +2,7 @@ import traceback
 from flask import Flask, request
 from tasks import cron_task
 from tasks import fb_messenger_reply
-from tasks import push_post_sender
+from tasks import push_post_sender, push_forum_ids ,FORUM_COUNT 
 import requests
 from tbot.facebook_messenger import get_users_name
 from tbot.facebook_messenger import check_user_activation
@@ -35,7 +35,7 @@ from tbot.forum_operations import get_forum_text
 # db_tpobot = mongo_client["tpobot_db"]
 
 
-FORUM_COUNT = 5
+
 # print fb_tpobot_access_code
 
 
@@ -70,20 +70,20 @@ def is_number(s):
 #     return reply_message
 
 
-def push_forum_ids(sender,forum_ids,start_count=0):
-    temp_list = list()
-    print forum_ids[start_count:start_count+FORUM_COUNT]
-    for each_title in generate_short_forum_texts(forum_ids[start_count:start_count+FORUM_COUNT] ):
-        # print each_title
-        msg =  each_title[1]
-        temp_list.append(msg)
-        sleep(0.1)
-        fb_messenger_reply.apply_async((sender, msg),dict(url=each_title[2],button="GET_BODY_POST_"+str(each_title[3]),button_str="View"))   
-    if len(forum_ids) - start_count>FORUM_COUNT:
-        fb_messenger_reply.apply_async((sender, strings_return_dict["get_more"]),dict(button="GET_MORE",button_str="More"))
-        # strings_return_dict["get_more"]
-        temp_list.append(strings_return_dict["get_more"])
-    return temp_list
+# def push_forum_ids(sender,forum_ids,start_count=0):
+#     temp_list = list()
+#     print forum_ids[start_count:start_count+FORUM_COUNT]
+#     for each_title in generate_short_forum_texts(forum_ids[start_count:start_count+FORUM_COUNT] ):
+#         # print each_title
+#         msg =  each_title[1]
+#         temp_list.append(msg)
+#         sleep(0.1)
+#         fb_messenger_reply.apply_async((sender, msg),dict(url=each_title[2],button="GET_BODY_POST_"+str(each_title[3]),button_str="View"))   
+#     if len(forum_ids) - start_count>FORUM_COUNT:
+#         fb_messenger_reply.apply_async((sender, strings_return_dict["get_more"]),dict(button="GET_MORE",button_str="More"))
+#         # strings_return_dict["get_more"]
+#         temp_list.append(strings_return_dict["get_more"])
+#     return temp_list
     
 
 def get_more(sender, store_dict_this_chat):

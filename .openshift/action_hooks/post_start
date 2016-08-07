@@ -12,4 +12,4 @@ cd $OPENSHIFT_REPO_DIR
 celery multi start worker1 \
 	-A tasks \
 	--pidfile="temp_dir/%n.pid" \
-    --logfile="%n.log"
+    --logfile="$OPENSHIFT_LOG_DIR/%n.log"

@@ -54,9 +54,9 @@ def get_fourms_ids_user(fb_user_id):
 
 
     user_data = db_tpobot.userinfo.find_one({"_id":fb_user_id})
-    print user_data
+    # print user_data
     forum_data = db_tpobot.forum_posts.find({"post_id":  {"$gt":user_data["last_forum_id"]}  })
-    print "forum_data"
+    # print "forum_data"
     # print forum_data
     # last_forum_data = db_tpobot.forum_posts.find_one( sort=[("post_id", pymongo.DESCENDING)])
     
@@ -75,7 +75,7 @@ def get_fourms_ids_user(fb_user_id):
                     "last_active":int(time.time())
                 }
             })
-    print forum_ids 
+    # print forum_ids 
     return forum_ids
 
 def get_last_forum():

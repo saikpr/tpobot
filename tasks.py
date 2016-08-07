@@ -1,11 +1,12 @@
 from celery import Celery
-from tbot.config import mongo_db_url
+from tbot.config import mongo_db_url, strings_return_dict
 from tbot.config import fb_tpobot_access_code, db_tpobot
 from tbot.forum_operations import forum_direct_login
 from tbot.forum_operations import check_valid_sid
 from tbot.forum_operations import get_top_forums_ids
 from tbot.forum_operations import get_forum_text
 from tbot.forum_operations import forum_post_ids
+from tbot.facebook_messenger import generate_short_forum_texts
 from tbot.facebook_messenger import get_forum_body, check_user_activation,get_fourms_ids_user
 import requests
 import logging
@@ -16,7 +17,7 @@ CELERY_BROKER = mongo_db_url
 celery_app = Celery(__name__)
 
 sid_php = None
-
+FORUM_COUNT = 5
 # print __name__
 celery_app.conf.update(
     #BROKER_URL='ironmq://<project_id>:<token>@',
@@ -46,6 +47,23 @@ def push_post_sender(forum_id,sender):
     # db_tpobot.chat_history.insert(store_dict_this_chat)
     fb_messenger_reply.apply_async((sender,forum_text[0][:300]+"......."),dict(url=forum_text[1]))
     return forum_text
+
+
+def push_forum_ids(sender,forum_ids,start_count=0):
+    temp_list = list()
+    forum_ids = list(forum_ids)
+    # print forum_ids[start_count:start_count+FORUM_COUNT]
+    for each_title in generate_short_forum_texts(forum_ids[start_count:start_count+FORUM_COUNT] ):
+        # print each_title
+        msg =  each_title[1]
+        temp_list.append(msg)
+        sleep(0.1)
+        fb_messenger_reply.apply_async((sender, msg),dict(url=each_title[2],button="GET_BODY_POST_"+str(each_title[3]),button_str="View"))   
+    if len(forum_ids) - start_count>FORUM_COUNT:
+        fb_messenger_reply.apply_async((sender, strings_return_dict["get_more"]),dict(button="GET_MORE",button_str="More"))
+        # strings_return_dict["get_more"]
+        temp_list.append(strings_return_dict["get_more"])
+    return temp_list
 
 @celery_app.task
 def cron_task():
@@ -97,8 +115,9 @@ def cron_task():
             if check_user_activation(each_user):
                 user_unpushed_posts = get_fourms_ids_user(each_user)
                 if user_unpushed_posts:
-                    for each_post in user_unpushed_posts:
-                        push_post_sender(forum_id=each_post,sender=each_user)
+                    push_forum_ids(each_user,user_unpushed_posts,start_count=0)
+                    # for each_post in user_unpushed_posts:
+                    #     push_post_sender(forum_id=each_post,sender=each_user)
 
         return_str += str(list_sub_forum)
     logging.info(return_str)

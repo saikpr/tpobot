@@ -18,7 +18,7 @@ push_bullet_token = os.environ.get("PUSHBULLET_AUTH_TOKEN","")
 
 register_access_code = os.environ.get("TPOBOT_ACCESS_CODE","")
 
-mongo_client  = MongoClient(mongo_db_url)
+mongo_client  = MongoClient(mongo_db_url,connect=False)
 db_tpobot = mongo_client["tpobot_db"]
 
 persistent_button_settings = {
