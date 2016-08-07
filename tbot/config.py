@@ -58,7 +58,7 @@ strings_return_dict = {
     "unable_to_understand" : "Either that's too cryptic or I am an idiot or both.\nI am soo confused!!!!!!!\n\ntype help for more info",
     "failing_everything" : "Monsoon is around the corner and I hate rain\n\nCharlie I am afraid to tell you that I am going to let you down \nContact Sainyam Kapoor and tell him about this",
     "push_activated" : "Activated Push Notifications.\n\nDon't want it ? Type:\n\npush off",
-    "push_deactivated" : "Deactivated Push Notifications.\n\Want it ? Type:\n\npush on",
+    "push_deactivated" : "Deactivated Push Notifications.\n\nWant it ? Type:\n\npush on",
     "thanks" : "It's my pleasure to help you"
 }
 
