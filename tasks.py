@@ -17,7 +17,7 @@ celery_app = Celery(__name__)
 
 sid_php = None
 
-
+print __name__
 celery_app.conf.update(
     #BROKER_URL='ironmq://<project_id>:<token>@',
     BROKER_URL=CELERY_BROKER,

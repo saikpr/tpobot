@@ -156,9 +156,9 @@ def help_message(user_name,fb_user_id):
 
 def hello_message(user_name,fb_user_id):
     if not check_user_activation(fb_user_id):
-        reply_message = "Heya "+user_name[0]+ "\n\nWhattta you doing?\n\nOh sharks!!!, I dont know anything about you!\nType 'help' for more info and registration"
+        reply_message = "Hii "+user_name[0]+ "\n\nOh sharks!!!, I dont know anything about you!\nType 'help' for more info and registration"
     else:
-        reply_message = "Heya "+user_name[0]+ "\n\nHow can i be of your help??"
+        reply_message = "Hii "+user_name[0]+ "\n\nWhat can I do for you???"
     return reply_message
 
 def get_top_forums():
