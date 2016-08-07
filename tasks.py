@@ -39,6 +39,11 @@ def push_post_sender(forum_id,sender):
     print "push_post_sender"
     forum_text = get_forum_body(forum_id)
     # print forum_text
+    store_dict_this_chat = dict()
+    store_dict_this_chat['sender'] = sender
+    store_dict_this_chat["reply_timestamp"] = int(time.time())
+    store_dict_this_chat["reply"] = forum_text
+    db_tpobot.chat_history.insert(store_dict_this_chat)
     fb_messenger_reply.apply_async((sender,forum_text[0][:300]+"......."),dict(url=forum_text[1]))
     return forum_text
 
