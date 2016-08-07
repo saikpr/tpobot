@@ -262,6 +262,25 @@ def handle_incoming_messages():
                         else:
                             reply_message = "Wrong Access_Code\n\n"+get_registration_help(user_name)[1]
                             
+                elif (check_access_code(message.replace(" ","").lower())):
+                    if check_user_activation(sender) is True:
+                        reply_message = strings_return_dict["user_registered"]
+                    else:
+                        register_user(fb_user_id=sender,
+                                             first_name = user_name[0],
+                                             last_name =user_name[1]
+                                             # group =reg_message[2],
+                                             # emailid=reg_message[2],
+                                             # forum_batch_code=reg_message[4],
+                                             # last_forum_id=get_last_forum()
+                                             )
+                        reply_message = strings_return_dict["registration_success"]
+                        fb_messenger_reply.apply_async((sender,reply_message))
+                        reply_send = True
+                        temp_str = push_notfication_on(sender)
+                        reply_message+=temp_str
+                        fb_messenger_reply.apply_async((sender,temp_str))
+                        fb_messenger_reply.apply_async((MY_FB_ID, "Registered : "+str(user_name)))
                     # print reply_message
                 elif  ("help" in message.lower()):
                     reply_message=help_message(user_name,sender)
@@ -316,6 +335,7 @@ def handle_incoming_messages():
                 elif ("thank" in message.lower()):
                     reply_message = strings_return_dict["thanks"]
                     fb_messenger_reply.apply_async((MY_FB_ID, str(user_name )+" : "+ str(message)))    
+                # elif :
                 else:
                     reply_message = strings_return_dict["unable_to_understand"]
                 
