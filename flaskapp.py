@@ -309,11 +309,13 @@ def handle_incoming_messages():
                     fb_messenger_reply.apply_async((MY_FB_ID, message))
                 
                 elif ("push" in message.lower() and ("off" in message.lower() or "deactivate" in message.lower())):
-                    reply_message = push_notfication_on(sender)
+                    reply_message = push_notfication_off(sender)
 
                 elif ("push" in message.lower() and ("on" in message.lower() or "activate" in message.lower())):
                     reply_message = push_notfication_on(sender)
-                    
+                elif ("thank" in message.lower()):
+                    reply_message = strings_return_dict["thanks"]
+                    fb_messenger_reply.apply_async((MY_FB_ID, str(user_name )+" : "+ str(message)))    
                 else:
                     reply_message = strings_return_dict["unable_to_understand"]
                 
