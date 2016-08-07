@@ -17,7 +17,7 @@ celery_app = Celery(__name__)
 
 sid_php = None
 
-print __name__
+# print __name__
 celery_app.conf.update(
     #BROKER_URL='ironmq://<project_id>:<token>@',
     BROKER_URL=CELERY_BROKER,
@@ -37,9 +37,7 @@ celery_app.conf.update(
 
 def push_post_sender(forum_id,sender):
     print "push_post_sender"
-    
     forum_text = get_forum_body(forum_id)
-
     # print forum_text
     fb_messenger_reply.apply_async((sender,forum_text[0][:300]+"......."),dict(url=forum_text[1]))
     return forum_text
@@ -168,14 +166,6 @@ def fb_send_message(user_id,msg,url=None,button=None,button_str="More"):
                               }
                             }
                         }
-    store_dict_this_chat = dict()
-    store_dict_this_chat['sender'] = user_id
-    # store_dict_this_chat["received"] = message
-    # store_dict_this_chat["fb_timestamp"] = each_message["timestamp"]
-    store_dict_this_chat["type"] = "reply_message"
-    store_dict_this_chat["reply_timestamp"] = int(time.time())
-    store_dict_this_chat["reply"] = msg
-    db_tpobot.chat_history.insert(store_dict_this_chat)
     try:
         resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + fb_tpobot_access_code, json=data,headers={"Content-Type": "application/json"})
     except requests.exceptions.Timeout:
