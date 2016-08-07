@@ -191,6 +191,7 @@ def activate_push_notification(fb_user_id):
     user_data = db_tpobot.userinfo.find_one({"_id":fb_user_id})
     if not user_data:
         return False
+    get_fourms_ids_user(fb_user_id)
     db_tpobot.userinfo.update_one(  
             {"_id": fb_user_id},
             {
