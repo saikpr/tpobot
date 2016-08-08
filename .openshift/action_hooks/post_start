@@ -12,4 +12,5 @@ cd $OPENSHIFT_REPO_DIR
 celery multi start worker1 \
 	-A tasks \
 	--pidfile="temp_dir/%n.pid" \
+	--concurrency=8 \
     --logfile="$OPENSHIFT_LOG_DIR/%n.log"

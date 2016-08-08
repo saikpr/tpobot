@@ -49,8 +49,8 @@ def register_user(fb_user_id, first_name, last_name, group=None, emailid=None, f
 
 def get_fourms_ids_user(fb_user_id):
     
-    if not check_user_activation(fb_user_id):
-        return False
+    # if not check_user_activation(fb_user_id):
+    #     return False
 
 
     user_data = db_tpobot.userinfo.find_one({"_id":fb_user_id})

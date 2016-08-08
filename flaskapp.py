@@ -257,7 +257,7 @@ def handle_incoming_messages():
                             temp_str = push_notfication_on(sender)
                             reply_message+=temp_str
                             fb_messenger_reply.apply_async((sender,temp_str))
-                            fb_messenger_reply.apply_async((MY_FB_ID, "Registered : "+str(user_name)))
+                            # fb_messenger_reply.apply_async((MY_FB_ID, "Registered : "+str(user_name)))
                             # reply_message = help_message(user_name,sender)
                         else:
                             reply_message = "Wrong Access_Code\n\n"+get_registration_help(user_name)[1]
@@ -280,7 +280,7 @@ def handle_incoming_messages():
                         temp_str = push_notfication_on(sender)
                         reply_message+=temp_str
                         fb_messenger_reply.apply_async((sender,temp_str))
-                        fb_messenger_reply.apply_async((MY_FB_ID, "Registered : "+str(user_name)))
+                        # fb_messenger_reply.apply_async((MY_FB_ID, "Registered : "+str(user_name)))
                     # print reply_message
                 elif  ("help" in message.lower()):
                     reply_message=help_message(user_name,sender)
@@ -371,9 +371,11 @@ def handle_incoming_messages():
                 store_dict_this_chat["fb_timestamp"] = each_message["timestamp"]
                 reply_message = ""
                 reply_send =False
-                if postback_payload == "PAYLOAD_FOR_UPDATES":
+                if check_user_activation(sender) is False: 
+                    reply_message = hello_message(user_name, sender)
+                    store_dict_this_chat["type"] = "not_registered"
+                elif postback_payload == "PAYLOAD_FOR_UPDATES":
                     reply_message,reply_send =  post_get_update(sender, store_dict_this_chat,user_name)
-
                 elif postback_payload == "PAYLOAD_FOR_HELP":
                     # help_message
                     reply_message=help_message(user_name,sender)
