@@ -79,7 +79,7 @@ def register_user(fb_user_id, first_name, last_name, email_id=None, group=None, 
     else:
         user_dict["last_forum_id"]=get_last_forum()-2
     tmp = db_tpobot.userinfo.insert_one(user_dict)
-    create_activation(fd_user_id)
+    # create_activation(fd_user_id)
     return True
 
 def get_fourms_ids_user(fb_user_id):
