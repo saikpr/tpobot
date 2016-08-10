@@ -147,49 +147,50 @@ def fb_send_message(user_id,msg,url=None,button=None,button_str="More"):
                               }
                             }
                         }
-    if url and button:
-        data["message"]={"attachment":
-                            {
-                              "type":"template",
-                              "payload":
-                              {
-                                "template_type":"button",
-                                "text":msg,
-                                "buttons":
-                                [
-                                  {
-                                    "type":"web_url",
-                                    "url":url,
-                                    "title":"Visit Forum"
-                                  },
-                                  {
-                                    "type":"postback",
-                                    "title":button_str,
-                                    "payload":button
-                                  }
-                                ]
-                              }
-                            }
-                        }
-    elif button:
-        data["message"]={"attachment":
-                            {
-                              "type":"template",
-                              "payload":
-                              {
-                                "template_type":"button",
-                                "text":msg,
-                                "buttons":
-                                [
-                                  {
-                                    "type":"postback",
-                                    "title":button_str,
-                                    "payload":button
-                                  }
-                                ]
-                              }
-                            }
-                        }
+    # if url and button:
+    #     data["message"]={"attachment":
+    #                         {
+    #                           "type":"template",
+    #                           "payload":
+    #                           {
+    #                             "template_type":"button",
+    #                             "text":msg,
+    #                             "buttons":
+    #                             [
+    #                               {
+    #                                 "type":"web_url",
+    #                                 "url":url,
+    #                                 "title":"Visit Forum"
+    #                               }
+    #                               ,
+    #                               {
+    #                                 "type":"postback",
+    #                                 "title":button_str,
+    #                                 "payload":button
+    #                               }
+    #                             ]
+    #                           }
+    #                         }
+    #                     }
+    # elif button:
+    #     data["message"]={"attachment":
+    #                         {
+    #                           "type":"template",
+    #                           "payload":
+    #                           {
+    #                             "template_type":"button",
+    #                             "text":msg,
+    #                             "buttons":
+    #                             [
+    #                               {
+    #                                 "type":"postback",
+    #                                 "title":button_str,
+    #                                 "payload":button
+    #                               }
+    #                             ]
+    #                           }
+    #                         }
+    #                     }
     try:
         resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + fb_tpobot_access_code, json=data,headers={"Content-Type": "application/json"})
     except requests.exceptions.Timeout:

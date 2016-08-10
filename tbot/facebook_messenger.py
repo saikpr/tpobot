@@ -8,7 +8,8 @@ from .config import  strings_return_dict
 import time
 import re
 import pymongo
-
+import os
+import hashlib
 
 
 def check_user_activation(fb_user_id):
@@ -22,7 +23,41 @@ def check_user_activation(fb_user_id):
         pass
     return True
 
-def register_user(fb_user_id, first_name, last_name, group=None, emailid=None, forum_batch_code=None, last_forum_id=None):
+
+def create_activation(fd_user_id):
+    user_data = db_tpobot.userinfo.find_one({"_id":fb_user_id})
+    if not user_data:
+        return False
+    rand_string = os.urandom(8)
+    rand_code = hashlib.md5(rand_string).hexdigest()
+    db_tpobot.userinfo.update_one(  
+        {"_id": fb_user_id},
+        {
+            "$set": {
+                "isvalid": False,
+                "access_code":rand_code
+            }
+        })
+    return True
+
+
+def activate_users(fd_user_id,access_code):
+    user_data = db_tpobot.userinfo.find_one({"_id":fb_user_id})
+    if not user_data:
+        return False
+    if access_code is not user_data.get("access_code",None):
+        return False
+    db_tpobot.userinfo.update_one(  
+        {"_id": fb_user_id},
+        {
+            "$set": {
+                "isvalid": True
+            }
+        })
+    return True
+
+
+def register_user(fb_user_id, first_name, last_name, email_id=None, group=None, forum_batch_code=None, last_forum_id=None):
     if  check_user_activation(fb_user_id) :
         return False
 
@@ -35,8 +70,8 @@ def register_user(fb_user_id, first_name, last_name, group=None, emailid=None, f
     }
     if group:
         user_dict["group"]=group
-    if emailid:    
-        user_dict["email_id"]=emailid
+    if email_id:    
+        user_dict["email_id"]=email_id
     if forum_batch_code:        
         user_dict["batch_forum_code"]=forum_batch_code
     if last_forum_id:
@@ -44,7 +79,7 @@ def register_user(fb_user_id, first_name, last_name, group=None, emailid=None, f
     else:
         user_dict["last_forum_id"]=get_last_forum()-2
     tmp = db_tpobot.userinfo.insert_one(user_dict)
-
+    create_activation(fd_user_id)
     return True
 
 def get_fourms_ids_user(fb_user_id):
@@ -112,7 +147,9 @@ def get_forum_body(forum_id):
     t =  db_tpobot.forum_posts.find_one({"post_id":forum_id})
     if not t:
         return None
-    return t["body"],t["url"]
+    # strings_return_dict["view_deactivated"]
+    # return t["body"],t["url"]
+    return strings_return_dict["view_deactivated"],t["url"]
 
 
 def get_forum_title(forum_id):

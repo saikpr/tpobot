@@ -210,6 +210,13 @@ def cron_update():
     cron_task.apply_async()
     return "Ok"
 
+
+@flask_app.route("/email_activation")
+def email_activate():
+    user = request.args.get('user_id',None)
+    return "TEMP"
+
+
 @flask_app.route('/messenger/webhook', methods=['POST'])
 def handle_incoming_messages():
     data = request.json

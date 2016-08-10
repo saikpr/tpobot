@@ -59,7 +59,8 @@ strings_return_dict = {
     "failing_everything" : "Monsoon is around the corner and I hate rain\n\nCharlie I am afraid to tell you that I am going to let you down \nContact Sainyam Kapoor and tell him about this",
     "push_activated" : "Activated Push Notifications.\n\nDon't want it ? Type:\n\npush off",
     "push_deactivated" : "Deactivated Push Notifications.\n\nWant it ? Type:\n\npush on",
-    "thanks" : "It's my pleasure to help you"
+    "thanks" : "It's my pleasure to help you",
+    "view_deactivated" : "Hey, Sorry View has been deactivated given security concerns, will activate in a few days.\n\nYou can still visit the forum and check out the posts."
 }
 
 my_user_agent = "tpobot v0.1"
