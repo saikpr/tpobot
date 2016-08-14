@@ -60,7 +60,8 @@ strings_return_dict = {
     "push_activated" : "Activated Push Notifications.\n\nDon't want it ? Type:\n\npush off",
     "push_deactivated" : "Deactivated Push Notifications.\n\nWant it ? Type:\n\npush on",
     "thanks" : "It's my pleasure to help you",
-    "view_deactivated" : "Hey, Sorry View has been deactivated given security concerns, will activate in a few days.\n\nYou can still visit the forum and check out the posts."
+    "view_deactivated" : "Hey, Sorry View has been deactivated given security concerns, will activate in a few days.\n\nYou can still visit the forum and check out the posts.",
+    "user_blocked" : "We believe you are not allowed to access to this bot. You have been blocked. \n\nIf you believe otherwise please contact Sainyam Kapoor at m.me/sainyamkapoor"
 }
 
 my_user_agent = "tpobot v0.1"

@@ -18,7 +18,7 @@ from tbot.facebook_messenger import get_forum_body
 from tbot.facebook_messenger import check_access_code 
 from tbot.facebook_messenger import activate_push_notification 
 from tbot.facebook_messenger import deactivate_push_notification 
-from tbot.facebook_messenger import check_push_notification
+from tbot.facebook_messenger import check_push_notification, is_user_blocked
 from tbot.config import db_tpobot
 from tbot.config import strings_return_dict, MY_FB_ID
 import pymongo
@@ -234,7 +234,10 @@ def handle_incoming_messages():
                 reply_send = False
                 # print store_dict_this_chat
                 reply_message = ""
-                if ("hi" in message.lower() or "hey" in message.lower() or "hello" in message.lower() or
+                if is_user_blocked(sender):
+                    reply_message = strings_return_dict["user_blocked"]
+                    store_dict_this_chat["type"] = "user_blocked"
+                elif ("hi" in message.lower() or "hey" in message.lower() or "hello" in message.lower() or
                         "howdy" in  message.lower()):
                     print "received_hello"
                     reply_message = hello_message(user_name, sender)
@@ -378,7 +381,10 @@ def handle_incoming_messages():
                 store_dict_this_chat["fb_timestamp"] = each_message["timestamp"]
                 reply_message = ""
                 reply_send =False
-                if check_user_activation(sender) is False: 
+                if is_user_blocked(sender):
+                    reply_message = strings_return_dict["user_blocked"]
+                    store_dict_this_chat["type"] = "user_blocked"
+                elif check_user_activation(sender) is False: 
                     reply_message = hello_message(user_name, sender)
                     store_dict_this_chat["type"] = "not_registered"
                 elif postback_payload == "PAYLOAD_FOR_UPDATES":

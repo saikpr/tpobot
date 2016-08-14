@@ -23,8 +23,31 @@ def check_user_activation(fb_user_id):
         pass
     return True
 
+def is_user_blocked(fb_user_id):
+    user_data = db_tpobot.userinfo.find_one({"_id":fb_user_id})
+    if not user_data:
+        return False
+    
+    try:
+        return user_data["is_blocked"] 
+    except KeyError:
+        pass
+    return False
 
-def create_activation(fd_user_id):
+def block_user(fb_user_id):
+    user_data = db_tpobot.userinfo.find_one({"_id":fb_user_id})
+    if not user_data:
+        return False
+    db_tpobot.userinfo.update_one(  
+        {"_id": fb_user_id},
+        {
+            "$set": {
+                "is_blocked": True
+            }
+        })
+    return True
+
+def create_activation(fb_user_id):
     user_data = db_tpobot.userinfo.find_one({"_id":fb_user_id})
     if not user_data:
         return False
