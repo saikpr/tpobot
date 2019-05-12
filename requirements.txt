@@ -4,7 +4,7 @@
 # in `lib/` subdirectory.
 #
 # Note: The `lib` directory is added to `sys.path` by `appengine_config.py`.
-Flask==0.11.1
+Flask==0.12.3
 beautifulsoup4==4.4.1
 requests==2.20.0
 celery==3.1.23
